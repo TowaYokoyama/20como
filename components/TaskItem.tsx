@@ -39,7 +39,7 @@ export default function TaskItem({ task, onToggleCompleted, onDelete} :TaskItemP
 
             <Pressable
                 onPress={()=> onDelete(task.id)}>
-                    <Ionicons name="trash-outline" sze={24} color={tw.color('gray-400')} />
+                    <Ionicons name="trash-outline" size={24} color={tw.color('gray-400')} />
                 </Pressable>
         </View>
     );

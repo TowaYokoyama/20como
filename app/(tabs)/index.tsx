@@ -1,67 +1,70 @@
-// app/(tabs)/index.tsx
+// components/AddTaskModal.tsx
 
 import React, { useState } from 'react';
-import { View, FlatList, Text, Alert } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { View, Text, Pressable, TextInput, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import tw from 'twrnc';
 
-import { Task } from '../../types'; // 型定義をインポート
+type AddTaskModalProps = {
+  visible: boolean;
+  onClose: () => void;
+  onSave: (title: string, category: string) => void;
+};
 
-// コンポーネントをインポート
-import Header from '../../components/header';
-import TaskItem from '../../components/TaskItem';
+export default function AddTaskModal({ visible, onClose, onSave }: AddTaskModalProps) {
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
 
-// 仮のデータ（モックデータ）
-const MOCK_TASKS: Task[] = [
-  { id: '1', title: '夜空を観察する', category: '天文学', isCompleted: false },
-  { id: '2', title: '星座について読む', category: '天文学', isCompleted: true },
-  { id: '3', title: 'プラネタリウムを訪れる', category: '天文学', isCompleted: false },
-  { id: '4', title: '宇宙講演会に参加する', category: '天文学', isCompleted: false },
-];
-
-export default function Index() {
-  // tasksのリストをstateとして管理
-  const [tasks, setTasks] = useState(MOCK_TASKS);
-
-  // タスクの完了・未完了を切り替える関数
-  const handleToggleComplete = (id: string) => {
-    // 元の配列を元に、新しい配列をmapで作成
-    const newTasks = tasks.map((task) => {
-      // idが一致するタスクだけ、isCompletedを反転させる
-      if (task.id === id) {
-        return { ...task, isCompleted: !task.isCompleted };
-      }
-      return task;
-    });
-    // 作成した新しい配列でstateを更新
-    setTasks(newTasks);
-  };
-
-  // タスクを削除する関数（今回はアラート表示のみ）
-  const handleDeleteTask = (id: string) => {
-    Alert.alert('削除機能', 'これは次のステップで実装します！');
+  const handleSave = () => {
+    if (!title.trim()) return;
+    onSave(title, category);
+    setTitle('');
+    setCategory('');
   };
 
   return (
-    <View style={tw`flex-1 bg-slate-900`}>
-      <Header />
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={tw`flex-1 justify-end`}
+      >
+        {/* 修正ポイント1: tw``の中の余分な{}を削除 */}
+        <View style={tw`bg-slate-800 p-5 rounded-t-2xl`}>
+          <Text style={tw`text-white text-xl font-bold mb-4`}>新しいタスク</Text>
 
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TaskItem
-            task={item}
-            // 作成した関数をTaskItemに渡す
-            onToggleCompleted={handleToggleComplete}
-            onDelete={handleDeleteTask}
+          {/* 修正ポイント2: "texst-white" -> "text-white" に修正 */}
+          <TextInput
+            value={title}
+            onChangeText={setTitle}
+            placeholder="タスクのタイトルを入力"
+            placeholderTextColor={tw.color('gray-500')}
+            style={tw`bg-slate-700 text-white p-3 rounded-lg mb-4`}
+            autoFocus={true}
           />
-        )}
-        contentContainerStyle={tw`p-5`}
-        ListHeaderComponent={<Text style={tw`text-white text-2xl font-bold mb-4`}>今日</Text>}
-      />
+          
+          <TextInput
+            value={category}
+            onChangeText={setCategory}
+            placeholder="カテゴリ（例: 天文学）"
+            placeholderTextColor={tw.color('gray-500')}
+            style={tw`bg-slate-700 text-white p-3 rounded-lg mb-6`}
+          />
 
-      <StatusBar style="light" />
-    </View>
+          <View style={tw`flex-row justify-end`}>
+            <Pressable onPress={onClose} style={tw`py-3 px-5 mr-2`}>
+              <Text style={tw`text-gray-400`}>キャンセル</Text>
+            </Pressable>
+            {/* 修正ポイント3: "oy-3" -> "py-3" に修正 */}
+            <Pressable onPress={handleSave} style={tw`bg-blue-500 py-3 px-5 rounded-lg`}>
+              <Text style={tw`text-white font-bold`}>保存</Text>
+            </Pressable>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
   );
 }
